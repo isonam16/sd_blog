@@ -10,9 +10,27 @@ Avada Kedavra!
 
 ![Architecture](/assets/a.png)
 
-*Don't worry, this isn't the Dark Arts class. This high-level architecture diagram of a Stable Diffusion model may look terrifying, but it's going to make sense in just a few minutes.*
+*Don't worry, this isn't the Dark Arts class ;). This high-level architecture diagram of a Stable Diffusion model may look terrifying, but it's going to make sense in just a few minutes.*
 
 In this blog, we will understand a diffusion model from scratch. Here we will discuss the various elements that make a stable diffusion model.
+
+## Flow Matching 
+In physics, "flow" describes how particles move over time, just like tracing ink diffusing in water. Flow matching in diffusion models draws inspiration from this concept.
+
+In ML terms:
+
+Forward flow: Clean data → progressively noisier data (like adding Gaussian noise).
+Reverse flow: Noise → clean data (like denoising step by step).
+
+A vector field describes the direction you should move in to go from one distribution to another. So, flow matching means learning a vector field (e.g., gradients or velocities) to "reverse" the noise trajectory and recover the data.
+*[Learn more](https://diffusionflow.github.io/)* 
+
+In diffusion models:
+
+Forward flow is known (we define the noise schedule).
+Reverse flow is learned using neural networks (where U-Net comes in!)
+
+
 
 ---
 
@@ -32,11 +50,12 @@ What if we could revert the noise process? Starting from noise, what if we could
 
 That’s exactly what diffusion models do: they learn how to reverse the diffusion process. Starting with random noise, they denoise step-by-step until a realistic image emerges.
 
-### Training the Noise Predictor and Reverse Process
+### Training the Noise Predictor and the Reverse Process     ( Noise to Nice )
 
 So how do we train a model to do this reverse process?
 
 We teach a neural network to **predict the noise** that was added during the forward process. In Stable Diffusion, this noise predictor is a **U-Net** model.
+
 
 Steps:
 
@@ -44,6 +63,9 @@ Steps:
 2. Generate some random noise.  
 3. Add that noise to the image (forward diffusion).  
 4. Train the U-Net to predict the noise that was added.
+
+
+![Architecture](/assets/noise_denoise.png){: width="700px" }
 
 During generation:
 
@@ -58,12 +80,12 @@ Initially, this process is **unconditional**. With **conditioning** (e.g., text 
 
 ## Latent Diffusion Model: Making It Fast
 
-One of the biggest challenges with earlier diffusion models was speed. They operated directly on high-resolution image pixels — and that’s expensive.
+One of the biggest challenges with earlier diffusion models was speed. They operated directly on pixel space itself , and it was expensive.
 
-Stable Diffusion solves this by using a **latent diffusion model** — it doesn't operate in pixel space but in a smaller **latent space** (about 48× smaller), making everything faster and more efficient.
+Stable Diffusion solves this by using a **latent diffusion model** ;it doesn't operate in pixel space but in a smaller **latent space** (about 48× smaller), making everything faster and more efficient.
 
 
-## ARCHITECTURE OVERVIEW OF SD :p
+## ARCHITECTURE OVERVIEW OF SD :
 
 
 ![Architecture](/assets/image2image.png)
@@ -79,6 +101,7 @@ Here's what the architecture looks like:
 
 ---
 
+>Wait! if you're new to concepts like VAEs, CLIP, or self-attention, just go through them briefly, but feel free to continue regardless; 
 
 ### Variational Autoencoder (VAE)
 
@@ -90,13 +113,14 @@ A VAE has:
 2. **Decoder** – Reconstructs the image
 
 In Stable Diffusion, all forward and reverse diffusion happens in this **latent space**, not pixel space.
+So , When generating images, the diffusion process operates in the latent space, not directly on the image pixels. Also, after the model denoises the latent, the decoder part of the VAE reconstructs the final image from this latent.
 
 ### Clip Encoder
-CLIP (Contrastive Language–Image Pre-training) is a model by OpenAI that learns to connect images and text. It creates similar embeddings (encodings) for an image and its matching caption, so they can be compared directly.
+CLIP (Contrastive Language–Image Pre-training) is a model that learns to connect images and text. It creates similar embeddings (encodings) for an image and its matching caption, so they can be compared directly.
 
-The following image shows how CLIP compares images and text. The text and image embeddings are compared using dot products. A higher dot product means a stronger match.
+The image below shows how CLIP compares images and text. The text and image embeddings are compared using dot products. A higher dot product means a stronger match.
 
-![CLIP](/assets/CLIP.png)
+![CLIP](/assets/CLIP.png){: width="600px" }
 
 You could also say:
 
@@ -106,7 +130,7 @@ If you are curious you can read more about CLIP in this [article](https://viso.a
 
 ### Scheduler
 
-A scheduler is a key component in diffusion models. At every timestamp, it controls how noise is added during the forward diffusion process and also guides how noise is removed during the reverse denoising process. It also determine the pace and structure of the entire diffusion process. Different schedulers (linear, cosine, DDIM, etc.) use different noise strategies. The choice of scheduler can affect image quality, speed, and stability. Without a proper scheduler, the model wouldn’t know how to denoise correctly. In short, it’s like a roadmap that guides the image generation process step by step.
+A scheduler is a key component in diffusion models. At every timestamp, it controls how noise is added during the forward diffusion process and also guides how noise is removed during the reverse denoising process. It also determine the pace and structure of the entire diffusion process. For ex, I have a complete noise image and during the early iterations I remove most of the predicted noise. But as the time passes, I start decreasing the strength and remove less noise than what was actuallly predicted in order to not loose important info. Different schedulers (linear, cosine, DDIM, etc.) use different noise strategies. The choice of scheduler can affect image quality, speed, and stability. 
 
 ---
 
@@ -118,7 +142,7 @@ Now let’s understand the actual math that powers forward and reverse diffusion
 
 In the forward diffusion step, we gradually add noise to the image or data over multiple steps until it becomes close to pure Gaussian noise. This process is repeated over a fixed number of timesteps, with a small amount of Gaussian noise added at each step. As the number of steps increases, the image becomes more noisy and over a lot of steps nearing to pure Gaussian noise. This sequence can be visualized as follows:
 
-![Forward Diffusion](/assets/forward_diffusion.png)
+![Forward Diffusion](/assets/forward_diffusion.png){: width="1200px" }
 
 Each forward step is:
 
@@ -174,7 +198,7 @@ $$
 
 ### Reverse Diffusion
 
-As the name suggests, reverse diffusion means that we are removing the noise and creating a new image. But instead of removing the noise, this predicts the noise that has to be removed and then subtracts it from the noisy image to get a clearer image. This step is also repeated multiple times until we get a good quality image.
+As I have said multiple times, reverse diffusion means that we are removing the noise and creating a new image. But instead of removing the noise, this predicts the noise that has to be removed and then subtracts it from the noisy image to get a clearer image. This step is also repeated multiple times until we get a good quality image.
 
 ![Reverse Diffusion](/assets/reverse_diffusion.png)
 
@@ -214,6 +238,76 @@ where $ \epsilon \sim \mathcal{N}(0, I) $ is Gaussian noise. At the final denois
 $
 x_0 = \mu_\theta(x_1, 1)
 $
+
 ---
 
 ### U-Net
+
+U-Net is the core architecture used in Stable Diffusion to denoise images during the reverse diffusion process. It has an encoder-decoder structure with skip connections that preserve spatial information.
+
+The encoder (downsampling path) reduces spatial resolution while increasing feature depth using ResNet blocks and downsampling layers. The decoder (upsampling path) gradually restores resolution using upsampling and ResNet blocks, combining features from the encoder via skip connections.
+
+Timestep information is encoded using sinusoidal positional embeddings, while text prompts are encoded using models like CLIP. These embeddings are injected into the ResNet blocks to guide the denoising process. Attention layers are added in deeper blocks to capture long-range dependencies and align with prompt semantics.
+
+The output of U-Net is the predicted noise for the current timestep, which is used to iteratively reconstruct the image.
+
+
+![UNET](/assets/unet.png){: width="700px"}
+
+
+Before looking at the individual architecture blocks, it’s important to understand how the U-Net receives information about the timestep and prompt.
+
+Although it may appear that the U-Net only processes a noisy image, it also receives two conditioning inputs:
+- A **timestep embedding** that encodes the current diffusion step using sinusoidal positional encoding (similar to Transformer encodings).
+- A **prompt embedding** (e.g., from CLIP or a class label encoder), which provides conditioning information for text-to-image generation or class-conditional generation.
+
+These embeddings are summed and passed into each ResNet block inside the U-Net.
+
+
+#### Downsample Block
+
+The downsampling path reduces spatial resolution and increases feature abstraction. Each downsample block:
+- Receives feature maps from the previous layer.
+- Uses a downsampling operation (e.g., max pooling) to reduce resolution.
+- Applies two ResNet blocks, each conditioned on the timestep and prompt embeddings (projected and added to the feature map).
+- In some blocks, self-attention layers are used to allow spatial positions to interact globally.
+
+
+#### Self-Attention Block
+
+Attention blocks replace some ResNet blocks in deeper layers. The input is reshaped from 2D to a sequence of tokens for Multi-Head Attention (MHA). For example, a feature map of shape `(128, 32, 32)` is reshaped to `(1024, 128)` and passed through:
+- LayerNorm
+- Attention (Q, K, V from the same input)
+- A feedforward network with skip connections
+- The output is reshaped back to `(128, 32, 32)`
+
+This enables the network to model long-range dependencies and better align image features with text tokens.
+
+
+#### Upsample Block
+
+The upsampling path increases resolution and reconstructs spatial detail. Each upsample block:
+- Upsamples the feature map (e.g., using nearest-neighbor + convolution).
+- Concatenates it with the corresponding feature map from the encoder (via skip connections).
+- Passes the result through two ResNet blocks.
+- Like in the encoder, the timestep + prompt embedding is projected and added.
+
+The final convolutional layer reduces the number of channels back to the original latent size (e.g., from `(64, 64, 64)` to `(4, 64, 64)`), producing the predicted noise at that timestep.
+
+
+The U-Net in Stable Diffusion is thus a conditional denoising network that receives a noisy latent image, timestep embedding, and prompt embedding, and predicts the noise component to be removed at that step of the reverse diffusion process.
+
+---
+
+## Conclusion
+
+We’ve gone through the fundamental concepts behind Stable Diffusion ;from the forward and reverse diffusion processes to how the model operates in latent space using a combination of VAEs, U-Nets, CLIP embeddings, and schedulers. We explored how noise is gradually added and then intelligently removed to generate desired images, and how conditioning with prompts guides the generation process.
+
+At its core, Stable Diffusion is a clever blend of probabilistic modeling and deep neural networks. It shows how noise, when modeled precisely, can be transformed back into coherent, meaningful images.
+
+Understanding each component is key to appreciating how the model works and what makes it both efficient and powerful.
+
+---
+
+Thanks for reading. If you want to dive deeper, explore the math behind diffusion models, experiment with open-source implementations, or try generating your own images with Hugging Face Spaces or Stable Diffusion APIs.
+
