@@ -91,6 +91,28 @@ A VAE has:
 
 In Stable Diffusion, all forward and reverse diffusion happens in this **latent space**, not pixel space.
 
+# IT ALL STARTS WITH NOISE !
+
+Avada Kedavra!
+
+
+![Architecture](/assets/a.png)
+
+*Don't worry, this isn't the Dark Arts class. This high-level architecture diagram of a Stable Diffusion model may look terrifying, but it's going to make sense in just a few minutes.*
+
+In this blog, we will understand a diffusion model from scratch. Here we will discuss the various elements that make a stable diffusion model.
+
+---
+
+## Diffusion
+
+Stable Diffusion belongs to a class of deep learning models called **diffusion models**. These are generative models, which means they’re designed to generate new data similar to what they saw during training. In the case of Stable Diffusion, this data is images.
+
+### Forward Diffusion
+
+The forward process is all about adding noise to an image, step-by-step, until the image becomes like random noise.
+
+Imagine we trained the model only on images of cats and dogs. Initially, these images form two distinct clusters. As we apply forward diffusion, we add noise over many steps, and eventually, all images
 > The latent space in Stable Diffusion is typically `4 × 64 × 64`, much smaller than full image size `3 × 512 × 512`.
 
 So now we add noise to a latent tensor, recover the clean latent, and decode it to get the final image.
@@ -112,7 +134,7 @@ If you are curious you can read more about CLIP in this [article](https://medium
 
 ### Scheduler
 
-### U-Net
+
 
 
 ---
@@ -208,3 +230,4 @@ x_0 = \mu_\theta(x_1, 1)
 $
 ---
 
+### U-Net
