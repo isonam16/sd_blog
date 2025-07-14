@@ -107,7 +107,7 @@ You could also say:
 
 > CLIP is a model that understands images and text together. It learns to match a picture with the right caption by putting them close in a shared space, making it useful for tasks like image search or classification using text.
 
-If you are curious you can read more about CLIP in this [article][https://medium.com/one-minute-machine-learning/clip-paper-explained-easily-in-3-levels-of-detail-61959814ad13]
+If you are curious you can read more about CLIP in this [article](https://medium.com/one-minute-machine-learning/clip-paper-explained-easily-in-3-levels-of-detail-61959814ad13)
 
 ### Scheduler
 
