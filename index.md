@@ -241,39 +241,56 @@ $
 
 ---
 
+
 ### U-Net
 
-U-Net is the core architecture used in Stable Diffusion to denoise images during the reverse diffusion process. It has an encoder-decoder structure with skip connections that preserve spatial information.
+
+Now, coming to U-Net ,the special neural network we use for denoising. It has an encoder-decoder structure with skip connections that preserve spatial information.
+
 
 The encoder (downsampling path) reduces spatial resolution while increasing feature depth using ResNet blocks and downsampling layers. The decoder (upsampling path) gradually restores resolution using upsampling and ResNet blocks, combining features from the encoder via skip connections.
 
-Timestep information is encoded using sinusoidal positional embeddings, while text prompts are encoded using models like CLIP. These embeddings are injected into the ResNet blocks to guide the denoising process. Attention layers are added in deeper blocks to capture long-range dependencies and align with prompt semantics.
+
+Timestep information is encoded using sinusoidal positional embeddings, while text prompts are encoded using the CLIP model. These embeddings are passed into the ResNet blocks to guide the denoising process. Then , attention layers are added in deeper blocks to capture long-range dependencies and also go accord to the prompt.
+
 
 The output of U-Net is the predicted noise for the current timestep, which is used to iteratively reconstruct the image.
+
+
 
 
 ![UNET](/assets/unet.png){: width="700px"}
 
 
+
+
 Before looking at the individual architecture blocks, it’s important to understand how the U-Net receives information about the timestep and prompt.
+
 
 Although it may appear that the U-Net only processes a noisy image, it also receives two conditioning inputs:
 - A **timestep embedding** that encodes the current diffusion step using sinusoidal positional encoding (similar to Transformer encodings).
-- A **prompt embedding** (e.g., from CLIP or a class label encoder), which provides conditioning information for text-to-image generation or class-conditional generation.
+- A **prompt embedding** (ex., from CLIP or a class label encoder), which provides conditioning information for text-to-image generation or class-conditional generation.
+
 
 These embeddings are summed and passed into each ResNet block inside the U-Net.
 
 
+
+
 #### Downsample Block
 
-The downsampling path reduces spatial resolution and increases feature abstraction. Each downsample block:
+
+In downsampling process. spatial resolution is reduced. Each downsample block:
 - Receives feature maps from the previous layer.
 - Uses a downsampling operation (e.g., max pooling) to reduce resolution.
 - Applies two ResNet blocks, each conditioned on the timestep and prompt embeddings (projected and added to the feature map).
 - In some blocks, self-attention layers are used to allow spatial positions to interact globally.
 
 
+
+
 #### Self-Attention Block
+
 
 Attention blocks replace some ResNet blocks in deeper layers. The input is reshaped from 2D to a sequence of tokens for Multi-Head Attention (MHA). For example, a feature map of shape `(128, 32, 32)` is reshaped to `(1024, 128)` and passed through:
 - LayerNorm
@@ -281,33 +298,50 @@ Attention blocks replace some ResNet blocks in deeper layers. The input is resha
 - A feedforward network with skip connections
 - The output is reshaped back to `(128, 32, 32)`
 
+
 This enables the network to model long-range dependencies and better align image features with text tokens.
+
+
 
 
 #### Upsample Block
 
+
 The upsampling path increases resolution and reconstructs spatial detail. Each upsample block:
-- Upsamples the feature map (e.g., using nearest-neighbor + convolution).
+- Upsamples the feature map.
 - Concatenates it with the corresponding feature map from the encoder (via skip connections).
 - Passes the result through two ResNet blocks.
-- Like in the encoder, the timestep + prompt embedding is projected and added.
+- Like in the encoder, the timestep ,plus prompt embedding is projected and added.
+
 
 The final convolutional layer reduces the number of channels back to the original latent size (e.g., from `(64, 64, 64)` to `(4, 64, 64)`), producing the predicted noise at that timestep.
 
 
+
+
 The U-Net in Stable Diffusion is thus a conditional denoising network that receives a noisy latent image, timestep embedding, and prompt embedding, and predicts the noise component to be removed at that step of the reverse diffusion process.
 
+
 ---
+
 
 ## Conclusion
 
-We’ve gone through the fundamental concepts behind Stable Diffusion ;from the forward and reverse diffusion processes to how the model operates in latent space using a combination of VAEs, U-Nets, CLIP embeddings, and schedulers. We explored how noise is gradually added and then intelligently removed to generate desired images, and how conditioning with prompts guides the generation process.
 
-At its core, Stable Diffusion is a clever blend of probabilistic modeling and deep neural networks. It shows how noise, when modeled precisely, can be transformed back into coherent, meaningful images.
+We’ve seen all the components of the architecture of Stable Diffusion . Summarizing all this: we have an input image and a prompt, first using the VAE encoder we encode a higher dimensional image into a lower dimensional latent space where we apply diffusion . One of the important categories of diffusion is DDPM wherein we had a gaussian noise at each timestep and then , using U-Net ,we predicted the noise and removed a part of it using the dynamic scheduler iteratively until we obtained our desired/ clean image.. 
+Also, in the U-Net step, we used attention between the image and embeddings of the prompt (generated by oneee and onlyy CLIP).
+Now, from the latent space , we go to pixel space by riding the decoder and hence we get the image.
+
 
 Understanding each component is key to appreciating how the model works and what makes it both efficient and powerful.
 
+
 ---
 
+
 Thanks for reading. If you want to dive deeper, explore the math behind diffusion models, experiment with open-source implementations, or try generating your own images with Hugging Face Spaces or Stable Diffusion APIs.
+
+
+
+
 
