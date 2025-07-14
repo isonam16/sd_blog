@@ -114,7 +114,7 @@ We see that only the mean depends on the previous step and $\beta_t \mathbf{I}$ 
 
 To simplify the math, let us say:
 
-$$\alpha_t = 1 - \beta_t\) \qquad \(\bar{\alpha}_t := \prod_{s=1}^t \alpha_s$$
+$$\alpha_t = 1 - \beta_t \qquad \bar{\alpha}_t := \prod_{s=1}^t \alpha_s$$
 
 So now we can write 
 $$
@@ -123,7 +123,7 @@ $$
 
 As the process continues, the mean $\mu_t$ evolves as:
 $$
-\mu_t &= \sqrt{\alpha_t} \, x_{t-1} = \sqrt{\alpha_t \alpha_{t-1}} \, x_{t-2} = \dots = \sqrt{\bar{\alpha}_t} \, x_0
+\mu_t = \sqrt{\alpha_t} \, x_{t-1} = \sqrt{\alpha_t \alpha_{t-1}} \, x_{t-2} = \dots = \sqrt{\bar{\alpha}_t} \, x_0
 $$
 
 Now we can finally write $x_t$ directly as a function of $x_0$ as follows:
@@ -165,8 +165,6 @@ where $ \epsilon \sim \mathcal{N}(0, I) $ is Gaussian noise. At the final denois
 $
 x_0 = \mu_\theta(x_1, 1)
 $
-
-
 ---
 
 ## Architecture
