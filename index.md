@@ -178,13 +178,28 @@ As the name suggests, reverse diffusion means that we are removing the noise and
 
 ![Reverse Diffusion](/assets/reverse_diffusion.png)
 
+Now because direct computation of $ q(x_{t-1} \mid x_t) $ is difficult, we learn a model $p_\theta$ to approximate it.
 
-Each reverse step can be written as a Gaussian:
+The reverse process is defined as:
+
+$$
+p_\theta(x_{0:T}) = p(x_T) \prod_{t=1}^{T} p_\theta(x_{t-1} \mid x_t)
+$$
+
+with each transition modeled as:
+
 $$
 p_\theta(x_{t-1} \mid x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \Sigma_\theta(x_t, t))
 $$
 
+
 Even though this equation looks deadly, lets break it down to understand it easily. Now in reverse diffusion we want to have $x_{t-1}$ from $x_t$, this gives us the LHS of the equation. Now it can be defined as a Gaussian distribution, with mean $\mu_\theta(x_t, t)$ and variance $\Sigma_\theta(x_t, t))$. This just suggests that the mean and the variance is just a function of $x_t$ and $t$.
+
+To train this model, we use the ELBO (Evidence Lower Bound) or the Jensen's inequality, which helps us optimize a lower bound on the data likelihood:
+
+$$
+L_{\text{VLB}} = \mathbb{E}_{q(\mathbf{x}_{0:T})} \left[ \log \frac{q(\mathbf{x}_{1:T} \mid \mathbf{x}_0)}{p_\theta(\mathbf{x}_{0:T})} \right] \geq -\mathbb{E}_{q(\mathbf{x}_0)} \log p_\theta(\mathbf{x}_0)
+$$
 
 After a lot of mathematical derivation (which can be found [here](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#nice)) we get, 
 $$
