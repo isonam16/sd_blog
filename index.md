@@ -98,7 +98,16 @@ So now we add noise to a latent tensor, recover the clean latent, and decode it 
 
 
 ### Clip Encoder
+CLIP (Contrastive Language–Image Pre-training) is a model by OpenAI that learns to connect images and text. It creates similar embeddings (encodings) for an image and its matching caption, so they can be compared directly.
+The following image shows how CLIP compares images and text. The text and image embeddings are compared using dot products. A higher dot product means a stronger match — like how the dog image matches well with the caption "pepper the aussie pup".
 
+![CLIP](/assets/CLIP.png)
+
+You could also say:
+
+> CLIP is a model that understands images and text together. It learns to match a picture with the right caption by putting them close in a shared space, making it useful for tasks like image search or classification using text.
+
+If you are curious you can read more about CLIP in this [article][https://medium.com/one-minute-machine-learning/clip-paper-explained-easily-in-3-levels-of-detail-61959814ad13]
 
 ### Scheduler
 
@@ -192,7 +201,6 @@ Using this mean, the final equation becomes:
 $$
 x_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \bar{\alpha}_t}{\sqrt{1 - \bar{\alpha}_t}} \beta_t \epsilon_\theta(x_t, t) \right) + \sqrt{\beta_t} \cdot \epsilon
 $$
-
 where $ \epsilon \sim \mathcal{N}(0, I) $ is Gaussian noise. At the final denoising step (i.e., $ t = 1 $), we do not add the noise term $ \sqrt{\beta_t} \cdot \epsilon $, because we want the clean sample:
 $
 x_0 = \mu_\theta(x_1, 1)
