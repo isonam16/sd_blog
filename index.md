@@ -91,34 +91,6 @@ A VAE has:
 
 In Stable Diffusion, all forward and reverse diffusion happens in this **latent space**, not pixel space.
 
-# IT ALL STARTS WITH NOISE !
-
-Avada Kedavra!
-
-
-![Architecture](/assets/a.png)
-
-*Don't worry, this isn't the Dark Arts class. This high-level architecture diagram of a Stable Diffusion model may look terrifying, but it's going to make sense in just a few minutes.*
-
-In this blog, we will understand a diffusion model from scratch. Here we will discuss the various elements that make a stable diffusion model.
-
----
-
-## Diffusion
-
-Stable Diffusion belongs to a class of deep learning models called **diffusion models**. These are generative models, which means they’re designed to generate new data similar to what they saw during training. In the case of Stable Diffusion, this data is images.
-
-### Forward Diffusion
-
-The forward process is all about adding noise to an image, step-by-step, until the image becomes like random noise.
-
-Imagine we trained the model only on images of cats and dogs. Initially, these images form two distinct clusters. As we apply forward diffusion, we add noise over many steps, and eventually, all images
-> The latent space in Stable Diffusion is typically `4 × 64 × 64`, much smaller than full image size `3 × 512 × 512`.
-
-So now we add noise to a latent tensor, recover the clean latent, and decode it to get the final image.
-
-
-
 ### Clip Encoder
 CLIP (Contrastive Language–Image Pre-training) is a model by OpenAI that learns to connect images and text. It creates similar embeddings (encodings) for an image and its matching caption, so they can be compared directly.
 
@@ -134,8 +106,7 @@ If you are curious you can read more about CLIP in this [article](https://medium
 
 ### Scheduler
 
-
-
+A scheduler is a key component in diffusion models. At every timestamp, it controls how noise is added during the forward diffusion process and also guides how noise is removed during the reverse denoising process. It also determine the pace and structure of the entire diffusion process. Different schedulers (linear, cosine, DDIM, etc.) use different noise strategies. The choice of scheduler can affect image quality, speed, and stability. Without a proper scheduler, the model wouldn’t know how to denoise correctly. In short, it’s like a roadmap that guides the image generation process step by step.
 
 ---
 
@@ -168,7 +139,7 @@ The variance is $\beta_t \mathbf{I}$, where $\mathbf{I}$ is the identity matrix.
 
 The above equation just suggests us that we are adding more noise to our data as and when we proceed to the next step. We are just changing the mean and variance of the distribution and making it converge to pure Gaussian Noise.
 
-$\beta_t$ is something called \textbf{schedule} and decides what amount of noise is to be added in each step. Researchers from OpenAI designed their own schedule and called it the cosine schedule.
+$\beta_t$ is something called **schedule** and decides what amount of noise is to be added in each step. Researchers from OpenAI designed their own schedule and called it the cosine schedule. This is produced by the scheduler discussed above.
 
 Now we will represent $x_t$ using $x_0$ instead of $x_{t-1}$. This can be done by representing $x_{t-1}$ in terms of $x_0$ and so on. For $t$ steps, it can be represented as:
 
