@@ -99,7 +99,8 @@ So now we add noise to a latent tensor, recover the clean latent, and decode it 
 
 ### Clip Encoder
 CLIP (Contrastive Language–Image Pre-training) is a model by OpenAI that learns to connect images and text. It creates similar embeddings (encodings) for an image and its matching caption, so they can be compared directly.
-The following image shows how CLIP compares images and text. The text and image embeddings are compared using dot products. A higher dot product means a stronger match — like how the dog image matches well with the caption "pepper the aussie pup".
+
+The following image shows how CLIP compares images and text. The text and image embeddings are compared using dot products. A higher dot product means a stronger match.
 
 ![CLIP](/assets/CLIP.png)
 
