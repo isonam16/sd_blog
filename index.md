@@ -16,7 +16,7 @@ In this blog, we will understand a diffusion model from scratch. Here we will di
 
 ---
 
-## Stable Diffusion
+## Diffusion
 
 Stable Diffusion belongs to a class of deep learning models called **diffusion models**. These are generative models, which means they’re designed to generate new data similar to what they saw during training. In the case of Stable Diffusion, this data is images.
 
@@ -62,7 +62,25 @@ One of the biggest challenges with earlier diffusion models was speed. They oper
 
 Stable Diffusion solves this by using a **latent diffusion model** — it doesn't operate in pixel space but in a smaller **latent space** (about 48× smaller), making everything faster and more efficient.
 
-### Enter: Variational Autoencoder (VAE)
+
+## ARCHITECTURE OVERVIEW OF SD :p
+
+
+![Architecture](/assets/image2image.png)
+
+
+
+Here's what the architecture looks like:
+
+
+- **VAE** for latent space encoding/decoding  
+- Optional **text encoder** for conditional generation  
+- **U-Net** for noise prediction  
+
+---
+
+
+### Variational Autoencoder (VAE)
 
 Compression to latent space is done using a **Variational Autoencoder (VAE)**.
 
@@ -77,9 +95,23 @@ In Stable Diffusion, all forward and reverse diffusion happens in this **latent 
 
 So now we add noise to a latent tensor, recover the clean latent, and decode it to get the final image.
 
+
+
+### Clip Encoder
+
+
+### Scheduler
+
+### U-Net
+
+
 ---
 
-## Forward Diffusion Process
+## The DDPM Process
+
+Now let’s understand the actual math that powers forward and reverse diffusion.
+
+### Forward Diffusion Process
 
 In the forward diffusion step, we gradually add noise to the image or data over multiple steps until it becomes close to pure Gaussian noise. This process is repeated over a fixed number of timesteps, with a small amount of Gaussian noise added at each step. As the number of steps increases, the image becomes more noisy and over a lot of steps nearing to pure Gaussian noise. This sequence can be visualized as follows:
 
@@ -137,7 +169,7 @@ $$
 
 ---
 
-## Reverse Diffusion
+### Reverse Diffusion
 
 As the name suggests, reverse diffusion means that we are removing the noise and creating a new image. But instead of removing the noise, this predicts the noise that has to be removed and then subtracts it from the noisy image to get a clearer image. This step is also repeated multiple times until we get a good quality image.
 
@@ -165,15 +197,5 @@ where $ \epsilon \sim \mathcal{N}(0, I) $ is Gaussian noise. At the final denois
 $
 x_0 = \mu_\theta(x_1, 1)
 $
----
-
-## Architecture
-
-Now that we've covered the math, here's what the architecture looks like:
-
-- **U-Net** for noise prediction  
-- **VAE** for latent space encoding/decoding  
-- Optional **text encoder** for conditional generation  
-
 ---
 
