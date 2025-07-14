@@ -81,73 +81,91 @@ So now we add noise to a latent tensor, recover the clean latent, and decode it 
 
 ## Forward Diffusion Process
 
-We gradually add Gaussian noise to the data over multiple steps. Eventually, the image becomes almost pure noise.
+In the forward diffusion step, we gradually add noise to the image or data over multiple steps until it becomes close to pure Gaussian noise. This process is repeated over a fixed number of timesteps, with a small amount of Gaussian noise added at each step. As the number of steps increases, the image becomes more noisy and over a lot of steps nearing to pure Gaussian noise. This sequence can be visualized as follows:
 
 ![Forward Diffusion](/assets/forward_diffusion.png)
 
 Each forward step is:
 
 $$
-q(x_t \mid x_{t-1}) = \mathcal{N}(x_t; \sqrt{1 - \beta_t} \, x_{t-1}, \beta_t \mathbf{I})
+    q(x_t \mid x_{t-1}) = \mathcal{N}(x_t; \sqrt{1 - \beta_t} \, x_{t-1}, \beta_t \mathbf{I})
 $$
-
+    
 Where:
 
-- \( q \): forward process  
-- \( x_t \): noisy data at step \( t \)  
-- \( $$\beta_t  $$\): noise variance  
-- \( $$ \mathcal{N} $$ \): Gaussian distribution  
+$q$ is the forward process distribution.
+$x_t$ is the noisy data at timestep $t$.
+$x_{t-1}$ is the data from the previous timestep.
+$\mathcal{N}$ denotes a normal (Gaussian) distribution.
+The mean is $\sqrt{1 - \beta_t} \, x_{t-1}$.
+The variance is $\beta_t \mathbf{I}$, where $\mathbf{I}$ is the identity matrix.
 
-We simplify:
 
+
+The above equation just suggests us that we are adding more noise to our data as and when we proceed to the next step. We are just changing the mean and variance of the distribution and making it converge to pure Gaussian Noise.
+
+$\beta_t$ is something called \textbf{schedule} and decides what amount of noise is to be added in each step. Researchers from OpenAI designed their own schedule and called it the cosine schedule.
+
+Now we will represent $x_t$ using $x_0$ instead of $x_{t-1}$. This can be done by representing $x_{t-1}$ in terms of $x_0$ and so on. For $t$ steps, it can be represented as:
+
+$$ q_t(q_{t-1}(q_{t-2}(\dots q_1(x_0)))) $$
+
+We see that only the mean depends on the previous step and $\beta_t \mathbf{I}$ is already known for each $t$.
+
+To simplify the math, let us say:
+
+$$\alpha_t = 1 - \beta_t\) \qquad \(\bar{\alpha}_t := \prod_{s=1}^t \alpha_s$$
+
+So now we can write 
 $$
-\alpha_t = 1 - \beta_t, \quad \bar{\alpha}_t = \prod_{s=1}^t \alpha_s
+q(x_1 \mid x_0) = \mathcal{N}(x_1; \sqrt{\alpha_1} \, x_0, (1 - \alpha_1)\mathbf{I})
 $$
 
-So,
+As the process continues, the mean $\mu_t$ evolves as:
+$$
+\mu_t &= \sqrt{\alpha_t} \, x_{t-1} = \sqrt{\alpha_t \alpha_{t-1}} \, x_{t-2} = \dots = \sqrt{\bar{\alpha}_t} \, x_0
+$$
+
+Now we can finally write $x_t$ directly as a function of $x_0$ as follows:
 $$
 q(x_t \mid x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t} \, x_0, (1 - \bar{\alpha}_t)\mathbf{I})
 $$
-or,
-
+ or, 
 $$
-x_t = \sqrt{\bar{\alpha}_t} \, x_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \epsilon, \quad \epsilon \sim \mathcal{N}(0, \mathbf{I})
+q(x_t \mid x_0) = \sqrt{\bar{\alpha}_t} \, x_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \epsilon, \quad \epsilon \sim \mathcal{N}(0, \mathbf{I})
 $$
 
 ---
 
 ## Reverse Diffusion
 
-This is the reverse process — removing noise step by step.
+As the name suggests, reverse diffusion means that we are removing the noise and creating a new image. But instead of removing the noise, this predicts the noise that has to be removed and then subtracts it from the noisy image to get a clearer image. This step is also repeated multiple times until we get a good quality image.
 
 ![Reverse Diffusion](/assets/reverse_diffusion.png)
 
-Each forward step is:
 
+Each reverse step can be written as a Gaussian:
 $$
-q(x_t \mid x_{t-1}) = \mathcal{N}(x_t; \sqrt{1 - \beta_t} \, x_{t-1}, \beta_t \mathbf{I})
-$$
-
-We simplify:
-
-$$
-\alpha_t = 1 - \beta_t, \quad \bar{\alpha}_t = \prod_{s=1}^t \alpha_s
+p_\theta(x_{t-1} \mid x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \Sigma_\theta(x_t, t))
 $$
 
-So,
+Even though this equation looks deadly, lets break it down to understand it easily. Now in reverse diffusion we want to have $x_{t-1}$ from $x_t$, this gives us the LHS of the equation. Now it can be defined as a Gaussian distribution, with mean $\mu_\theta(x_t, t)$ and variance $\Sigma_\theta(x_t, t))$. This just suggests that the mean and the variance is just a function of $x_t$ and $t$.
 
+After a lot of mathematical derivation (which can be found [here](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#nice)) we get, 
 $$
-q(x_t \mid x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t} \, x_0, (1 - \bar{\alpha}_t)\mathbf{I})
-$$
-
-or,
-
-$$
-x_t = \sqrt{\bar{\alpha}_t} \, x_0 + \sqrt{1 - \bar{\alpha}_t} \cdot \epsilon, \quad \epsilon \sim \mathcal{N}(0, \mathbf{I})
+\mu_\theta(x_t, t) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \bar{\alpha}_t}{\sqrt{1 - \alpha_t}} \epsilon_\theta(x_t, t) \right)
 $$
 
+Using this mean, the final equation becomes:
+$$
+x_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \bar{\alpha}_t}{\sqrt{1 - \bar{\alpha}_t}} \beta_t \epsilon_\theta(x_t, t) \right) + \sqrt{\beta_t} \cdot \epsilon
+$$
 
-> Math reference: [Lilian Weng’s post](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/#reverse-diffusion-process)
+where $ \epsilon \sim \mathcal{N}(0, I) $ is Gaussian noise. At the final denoising step (i.e., $ t = 1 $), we do not add the noise term $ \sqrt{\beta_t} \cdot \epsilon $, because we want the clean sample:
+$
+x_0 = \mu_\theta(x_1, 1)
+$
+
 
 ---
 
