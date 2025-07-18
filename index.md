@@ -67,7 +67,7 @@ Steps:
 4. Train the U-Net to predict the noise that was added.
 
 
-![Architecture](/sd_blog/assets/noise_denoise.png){: width="700px" }
+![noisedenoise](/sd_blog/assets/noise_denoise.png){: width="700px" }
 
 During generation:
 
