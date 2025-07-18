@@ -8,7 +8,8 @@ title: "IT ALL STARTS WITH NOISE"
 Avada Kedavra!
 
 
-![Architecture](/assets/a.png)
+![Architecture](/sd_blog/assets/photo.png)
+
 
 *Don't worry, this isn't the Dark Arts class ;). This high-level architecture diagram of a Stable Diffusion model may look terrifying, but it's going to make sense in just a few minutes.*
 
@@ -65,7 +66,7 @@ Steps:
 4. Train the U-Net to predict the noise that was added.
 
 
-![Architecture](/assets/noise_denoise.png){: width="700px" }
+![Architecture](/sd_blog/assets/noise_denoise.png){: width="700px" }
 
 During generation:
 
@@ -88,7 +89,7 @@ Stable Diffusion solves this by using a **latent diffusion model** ;it doesn't o
 ## ARCHITECTURE OVERVIEW OF SD :
 
 
-![Architecture](/assets/image2image.png)
+![Architecture](/sd_blog/assets/image2image.png)
 
 
 
@@ -120,7 +121,7 @@ CLIP (Contrastive Language–Image Pre-training) is a model that learns to conne
 
 The image below shows how CLIP compares images and text. The text and image embeddings are compared using dot products. A higher dot product means a stronger match.
 
-![CLIP](/assets/CLIP.png){: width="600px" }
+![CLIP](/sd_blog/assets/CLIP.png){: width="600px" }
 
 You could also say:
 
@@ -142,7 +143,7 @@ Now let’s understand the actual math that powers forward and reverse diffusion
 
 In the forward diffusion step, we gradually add noise to the image or data over multiple steps until it becomes close to pure Gaussian noise. This process is repeated over a fixed number of timesteps, with a small amount of Gaussian noise added at each step. As the number of steps increases, the image becomes more noisy and over a lot of steps nearing to pure Gaussian noise. This sequence can be visualized as follows:
 
-![Forward Diffusion](/assets/forward_diffusion.png){: width="1200px" }
+![Forward Diffusion](/sd_blog/assets/forward_diffusion.png){: width="1200px" }
 
 Each forward step is:
 
@@ -200,7 +201,7 @@ $$
 
 As I have said multiple times, reverse diffusion means that we are removing the noise and creating a new image. But instead of removing the noise, this predicts the noise that has to be removed and then subtracts it from the noisy image to get a clearer image. This step is also repeated multiple times until we get a good quality image.
 
-![Reverse Diffusion](/assets/reverse_diffusion.png)
+![Reverse Diffusion](/sd_blog/assets/reverse_diffusion.png)
 
 Now because direct computation of $ q(x_{t-1} \mid x_t) $ is difficult, we learn a model $p_\theta$ to approximate it.
 
