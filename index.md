@@ -9,7 +9,7 @@ Avada Kedavra!
 
 
 
-![Architecture](/sd_blog/assets/photo.png)
+![Architecture](/sd_blog/assets/a.png)
 
 
 *Don't worry, this isn't the Dark Arts class ;). This high-level architecture diagram of a Stable Diffusion model may look terrifying, but it's going to make sense in just a few minutes.*
@@ -263,7 +263,7 @@ The output of U-Net is the predicted noise for the current timestep, which is us
 
 
 
-![UNET](/assets/unet.png){: width="700px"}
+![UNET](/sd_blog/assets/unet.png){: width="700px"}
 
 
 
